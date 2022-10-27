@@ -1,40 +1,23 @@
 use crate::*;
-trait NonFungibleOnTransfer {
-    //Method stored on the receiver contract that is called via cross contract call when nft_transfer_call is called
-    /// Returns `true` if the token should be returned back to the sender.
+pub trait NonFungibleTokenReceiver {
     fn nft_on_transfer(
         &mut self,
         sender_id: AccountId,
         previous_owner_id: AccountId,
         token_id: TokenId,
         msg: String,
-    ) -> Promise;
-
-    // fn nft_resolve_transfer(
-    //     &mut self,
-    //     //we introduce an authorized ID for logging the transfer event
-    //     authorized_id: Option<String>,
-    //     owner_id: AccountId,
-    //     receiver_id: AccountId,
-    //     token_id: TokenId,
-    //     //we introduce the approval map so we can keep track of what the approvals were before the transfer
-    //     approved_account_ids: HashMap<AccountId, u64>,
-    //     //we introduce a memo for logging the transfer event
-    //     memo: Option<String>,
-    // ) -> bool;
+    ) -> PromiseOrValue<bool>;
 }
 
 #[near_bindgen]
-impl NonFungibleOnTransfer for Contract {
+impl NonFungibleTokenReceiver for Contract {
     fn nft_on_transfer(
         &mut self,
         sender_id: AccountId,
         previous_owner_id: AccountId,
         token_id: TokenId,
         msg: String,
-    ) -> Promise {
-        // enforce cross contract call and owner_id is signer
-
+    ) -> PromiseOrValue<bool> {
         let nft_contract_id = env::predecessor_account_id();
         let signer_id = env::signer_account_id();
         println!(
@@ -50,19 +33,8 @@ impl NonFungibleOnTransfer for Contract {
             owner_paid_storage > signer_storage_required,
             "Insufficient storage paid"
         );
-        // if owner_paid_storage < signer_storage_required {
-        //     let notif = format!(
-        //         "Insufficient storage paid: {}, for {} sales at {} rate of per sale",
-        //         owner_paid_storage,
-        //         signer_storage_required / storage_amount,
-        //         storage_amount
-        //     );
-        //     env::log_str(&notif);
-        //     return PromiseOrValue::Value(false);
-        // };
-        Promise::new("bob_near".parse().unwrap())
-            .create_account()
-            .transfer(0)
-            .add_full_access_key(env::signer_account_pk())
+
+        self._internal_receive_nft(nft_contract_id, sender_id, token_id);
+        PromiseOrValue::Value(false)
     }
 }
