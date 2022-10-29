@@ -2,7 +2,7 @@ use crate::*;
 
 /// external contract calls
 
-#[ext_contract(ext_contract)]
+#[ext_contract(ext_non_fungible_token)]
 trait ExtContract {
     fn nft_transfer_payout(
         &mut self,

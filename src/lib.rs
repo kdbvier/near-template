@@ -12,6 +12,9 @@ use near_sdk::{
 mod external;
 mod nft_callbacks;
 pub type TokenId = String;
+
+const GAS_FOR_FT_TRANSFER: Gas = Gas(10_000_000_000_000);
+const GAS_FOR_NFT_TRANSFER: Gas = Gas(20_000_000_000_000);
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct StakingInfo {
@@ -169,9 +172,10 @@ impl Contract {
 
     #[payable]
     pub fn claim_rewards(&mut self) {
+        assert_one_yocto();
         let account = env::predecessor_account_id();
         self.update_unclaimed_amount(account.clone());
-        let staking_info = self
+        let mut staking_info = self
             .staking_per_owner
             .get(&account)
             .expect("Marble: You don't have any staked Nfts.");
@@ -180,6 +184,103 @@ impl Contract {
             staking_info.unclaimed_amount, 0u128,
             "Marble: You don't have any reward"
         );
+        ext_fungible_token::ft_transfer(
+            account.clone(),
+            staking_info.unclaimed_amount.into(),
+            None,
+            self.ft_address.clone(),
+            1,
+            GAS_FOR_FT_TRANSFER,
+        )
+        .then(ext_self::callback_post_withdraw_deposit(
+            self.ft_address.clone(),
+            staking_info.unclaimed_amount,
+            env::current_account_id(),
+            0,
+            GAS_FOR_FT_TRANSFER,
+        ));
+        staking_info.claimed_amount += staking_info.unclaimed_amount;
+        staking_info.unclaimed_amount = 0u128;
+        staking_info.claimed_timestamp = to_sec(env::block_timestamp());
+        self.staking_per_owner.insert(&account, &staking_info);
+    }
+
+    #[payable]
+    pub fn create_unstake(&mut self) {
+        let account = env::predecessor_account_id();
+        self.update_unclaimed_amount(account.clone());
+        let mut staking_info = self
+            .staking_per_owner
+            .get(&account)
+            .expect("Marble: No nfts");
+        staking_info.create_unstake_timestamp = to_sec(env::block_timestamp());
+
+        self.staking_per_owner.insert(&account, &staking_info);
+        env::log_str(
+            &json!({
+                "type": "create_unstake",
+                "params": {
+                    "owner_id": account,
+                }
+            })
+            .to_string(),
+        )
+    }
+
+    #[payable]
+    pub fn fetch_unstake(&mut self) {
+        let account = env::predecessor_account_id();
+        self.update_unclaimed_amount(account.clone());
+        let staking_info = self
+            .staking_per_owner
+            .get(&account)
+            .expect("Marble: no nft");
+        if staking_info.unclaimed_amount > 0u128 {
+            ext_fungible_token::ft_transfer(
+                account.clone(),
+                staking_info.unclaimed_amount.into(),
+                None,
+                self.ft_address.clone(),
+                1,
+                GAS_FOR_FT_TRANSFER,
+            )
+            .then(ext_self::callback_post_withdraw_deposit(
+                self.ft_address.clone(),
+                staking_info.unclaimed_amount,
+                env::current_account_id(),
+                0,
+                GAS_FOR_FT_TRANSFER,
+            ));
+        }
+
+        for token_id in staking_info.token_ids.clone() {
+            ext_non_fungible_token::nft_transfer(
+                env::current_account_id(),
+                staking_info.address,
+                None,
+                token_id,
+                1,
+                GAS_FOR_NFT_TRANSFER,
+            )
+            .then(ext_self::nft_unstaking_callback(
+                account,
+                token_id,
+                env::current_account_id(),
+                1,
+                GAS_FOR_NFT_TRANSFER,
+            ));
+            env::log_str(
+                &json!({
+                    "type": "unstake_nft",
+                    "params": {
+                        "owner_id": staking_info.address,
+                        "token_id": token_id,
+                    }
+                })
+                .to_string(),
+            );
+        }
+        self.staking_per_owner.remove(&account);
     }
 
     pub fn get_owner(&self) -> AccountId {
@@ -208,11 +309,11 @@ impl Contract {
             0,
             Gas(0),
         )
-        .then(ext_self::ft_balance_of_callback(
-            env::current_account_id(),
-            0,
-            Gas(0),
-        ))
+        // .then(ext_self::ft_balance_of_callback(
+        //     env::current_account_id(),
+        //     0,
+        //     Gas(0),
+        // ))
     }
 
     #[private]
@@ -227,6 +328,37 @@ impl Contract {
             }
         }
     }
+
+    #[private]
+    pub fn callback_post_withdraw_deposit(&mut self, owner_id: AccountId, amount: u128) -> U128 {
+        env::log_str(
+            &json!({
+                "type": "claim_reward",
+                "params": {
+                    "owner_id": owner_id,
+                    "amount": amount,
+                }
+            })
+            .to_string(),
+        );
+        U128(0)
+    }
+
+    #[private]
+    pub fn nft_unstaking_callback(&mut self, owner_id: AccountId, token_id: String) -> U128 {
+        env::log_str(
+            &json!({
+                "type": "unstake_nft",
+                "params": {
+                    "owner_id": owner_id,
+                    "token_id": token_id,
+                }
+            })
+            .to_string(),
+        );
+        U128(0)
+    }
+
     // pub fn get_supply_by_owner_id(&self, account_id: AccountId) -> U64 {
     //     self.staking_per_owner
     //         .get(&account_id)
@@ -290,6 +422,8 @@ pub fn to_sec(timestamp: Timestamp) -> u64 {
 #[ext_contract(ext_self)]
 trait ExtSelf {
     fn ft_balance_of_callback(&mut self) -> String;
+    fn callback_post_withdraw_deposit(&mut self, owner_id: AccountId, amount: u128) -> U128;
+    fn nft_unstaking_callback(&mut self, owner_id: AccountId, token_id: String) -> U128;
 }
 
 // use the attribute below for unit tests

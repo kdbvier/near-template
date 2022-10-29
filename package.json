@@ -7,7 +7,7 @@
     "build:contract": "make release",
     "build:local": "./build.sh",
     "dev:deploy": "yarn build:contract && rm -rf neardev && (near dev-deploy || exit 0)",
-    "test": "cargo test --all -- --nocapture --color always",
+    "test": "node ./test/js_test.js",
     "test:mocha": "mocha"
   },
   "dependencies": {
