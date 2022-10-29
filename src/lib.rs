@@ -1,4 +1,4 @@
-use external::ext_fungible_token;
+use external::{ext_fungible_token, ext_non_fungible_token};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{LazyOption, LookupMap, LookupSet, UnorderedMap, UnorderedSet};
 use near_sdk::json_types::{U128, U64};
@@ -255,16 +255,16 @@ impl Contract {
 
         for token_id in staking_info.token_ids.clone() {
             ext_non_fungible_token::nft_transfer(
-                env::current_account_id(),
-                staking_info.address,
+                staking_info.address.clone(),
+                token_id.clone(),
                 None,
-                token_id,
+                env::current_account_id(),
                 1,
                 GAS_FOR_NFT_TRANSFER,
             )
             .then(ext_self::nft_unstaking_callback(
-                account,
-                token_id,
+                account.clone(),
+                token_id.clone(),
                 env::current_account_id(),
                 1,
                 GAS_FOR_NFT_TRANSFER,
