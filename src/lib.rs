@@ -304,8 +304,8 @@ impl Contract {
 
     pub fn get_total_amount(&self) -> Promise {
         ext_fungible_token::ft_balance_of(
+            env::current_account_id(),
             self.ft_address.clone().to_string(),
-            env::predecessor_account_id(),
             0,
             Gas(0),
         )

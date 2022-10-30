@@ -78,6 +78,14 @@ const getConfig = async () => {
     //   {}
     // );
     // console.log("staking-config: ", upadated_config);
+    const ft_amount_in_ft_contract = await ownerAccount.viewFunction(
+      ftContractName,
+      "ft_balance_of",
+      {
+        account_id: stakingContractName,
+      }
+    );
+    console.log("ft_amount_in_ft_contract: ", ft_amount_in_ft_contract);
     const ft_amount = await ownerAccount.viewFunction(
       stakingContractName,
       "get_total_amount",
