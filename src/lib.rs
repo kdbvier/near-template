@@ -307,7 +307,7 @@ impl Contract {
             env::current_account_id(),
             self.ft_address.clone(),
             0,
-            Gas(0),
+            Gas(5000000000000),
         )
         // .then(ext_self::ft_balance_of_callback(
         //     env::current_account_id(),
