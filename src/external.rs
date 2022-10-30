@@ -19,5 +19,5 @@ pub trait ExtContract {
 #[ext_contract(ext_fungible_token)]
 pub trait FungibleToken {
     fn ft_transfer(&mut self, receiver_id: AccountId, amount: U128, memo: Option<String>);
-    fn ft_balance_of(&mut self, account_id: String) -> String;
+    fn ft_balance_of(&mut self, account_id: AccountId) -> U128;
 }
