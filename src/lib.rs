@@ -317,7 +317,9 @@ impl Contract {
     }
 
     pub fn get_stake_info(&self, owner: AccountId) -> StakingInfo {
-        self.staking_per_owner.get(&owner)
+        self.staking_per_owner
+            .get(&owner)
+            .expect("Marble: You don't have any staked nfts.")
     }
 
     #[private]
