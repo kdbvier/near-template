@@ -37,6 +37,14 @@ pub struct ConfigInfo {
     pub lock_time: u64,
     pub enabled: bool,
 }
+
+#[derive(Serialize, Deserialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct StakingInfoJson {
+    account_id: AccountId,
+    staking_info: StakingInfo,
+}
+
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
 pub struct Contract {
@@ -44,7 +52,7 @@ pub struct Contract {
     pub owner_id: AccountId,
 
     //keeps track of all the token IDs for a given account
-    pub staking_per_owner: LookupMap<AccountId, StakingInfo>,
+    pub staking_per_owner: UnorderedMap<AccountId, StakingInfo>,
 
     pub storage_deposits: LookupMap<AccountId, Balance>,
     pub nft_address: AccountId,
@@ -76,7 +84,7 @@ impl Contract {
         lock_time: u64,
     ) -> Self {
         let this = Self {
-            staking_per_owner: LookupMap::new(StorageKey::TokensPerOwner),
+            staking_per_owner: UnorderedMap::new(StorageKey::TokensPerOwner),
             owner_id,
             storage_deposits: LookupMap::new(StorageKey::StorageDeposits),
             nft_address,
@@ -116,7 +124,7 @@ impl Contract {
         let mut user_stake_info = self
             .staking_per_owner
             .get(&owner_id)
-            .expect("Marble: You don't have any staking token");
+            .expect("Marble: You don't have any staking nft");
         if user_stake_info.create_unstake_timestamp == 0u64 {
             user_stake_info.unclaimed_amount += ((to_sec(env::block_timestamp()) as u128
                 / self.interval as u128
@@ -207,6 +215,7 @@ impl Contract {
 
     #[payable]
     pub fn create_unstake(&mut self) {
+        assert_one_yocto();
         let account = env::predecessor_account_id();
         self.update_unclaimed_amount(account.clone());
         let mut staking_info = self
@@ -320,6 +329,29 @@ impl Contract {
         self.staking_per_owner
             .get(&owner)
             .expect("Marble: You don't have any staked nfts.")
+    }
+
+    pub fn get_all_stake_info(
+        &self,
+        from_index: Option<U128>,
+        limit: Option<u64>,
+    ) -> Vec<StakingInfoJson> {
+        let start_index: u128 = from_index.map(From::from).unwrap_or_default();
+        assert!(
+            (self.staking_per_owner.len() as u128) > start_index,
+            "Out of bounds, please use a smaller from_index."
+        );
+        let limit = limit.map(|v| v as usize).unwrap_or(usize::MAX);
+        assert_ne!(limit, 0, "Cannot provide limit of 0.");
+        self.staking_per_owner
+            .iter()
+            .skip(start_index as usize)
+            .take(limit)
+            .map(|(account, stake_info)| StakingInfoJson {
+                account_id: account,
+                staking_info: stake_info,
+            })
+            .collect()
     }
 
     #[private]

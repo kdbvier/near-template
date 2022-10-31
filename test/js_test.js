@@ -105,6 +105,61 @@ const getConfig = async () => {
   }
 };
 
+const ft_deposit_in_staking = async () => {
+  // const ft_balance = await ownerAccount.viewFunction(
+  //   ftContractName,
+  //   "ft_balance_of",
+  //   {
+  //     account_id: "vier1near.testnet",
+  //   }
+  // );
+  // console.log("ft balance before staking: ", ft_balance);
+  // await bidderAccount.functionCall({
+  //   contractId: ftContractName,
+  //   methodName: "ft_transfer",
+  //   args: {
+  //     receiver_id: stakingContractName,
+  //     amount: "10000000000000000",
+  //   },
+  //   gas: gas,
+  //   attachedDeposit: "1",
+  // });
+  const after_ft_balance = await ownerAccount.viewFunction(
+    ftContractName,
+    "ft_balance_of",
+    {
+      account_id: stakingContractName,
+    }
+  );
+  console.log("ft balance before staking: ", after_ft_balance);
+  // const storage_deposit = await ownerAccount.functionCall({
+  //   contractId: ftContractName,
+  //   methodName: "storage_deposit",
+  //   args: {
+  //     account_id: stakingContractName,
+  //   },
+  //   gas: gas,
+  //   attachedDeposit: "10000000000000000000000",
+  // });
+  // await ownerAccount.functionCall({
+  //   contractId: ftContractName,
+  //   methodName: "mint",
+  //   args: {
+  //     account_id: "vier4near.testnet",
+  //     amount: "10000000000000000",
+  //   },
+  //   gas: gas,
+  // });
+  // const after_ft_balance = await ownerAccount.viewFunction(
+  //   ftContractName,
+  //   "ft_balance_of",
+  //   {
+  //     account_id: "vier4near.testnet",
+  //   }
+  // );
+  // console.log("ft balance before staking: ", after_ft_balance);
+};
+
 const nft_staking = async () => {
   const formattedParams = {
     token_metadata: {
@@ -165,7 +220,7 @@ const nft_staking = async () => {
   //   nftContractName,
   //   "nft_token",
   //   {
-  //     token_id: "1:1",
+  //     token_id: "1:2",
   //   }
   // );
   // console.log("minted_nft: ", minted_nft);
@@ -175,24 +230,57 @@ const nft_staking = async () => {
   //   methodName: "nft_transfer_call",
   //   args: {
   //     receiver_id: stakingContractName,
-  //     token_id: "1:1",
+  //     token_id: "1:2",
   //     msg: JSON.stringify({}),
   //   },
   //   gas: gas,
   //   attachedDeposit: "1",
   // });
+
   // const staked_nft = await ownerAccount.viewFunction(
   //   nftContractName,
   //   "nft_token",
   //   {
-  //     token_id: "1:1",
+  //     token_id: "1:2",
   //   }
   // );
   // console.log("staked_nft: ", staked_nft);
-  // const config =
+
+  const config = await ownerAccount.viewFunction(
+    stakingContractName,
+    "get_stake_info",
+    {
+      owner: ownerAccountName,
+    }
+  );
+  console.log("stake_info: ", config);
+
+  // await ownerAccount.functionCall({
+  //   contractId: stakingContractName,
+  //   methodName: "create_unstake",
+  //   args: {},
+  //   gas: gas,
+  //   // attachedDeposit: "1",
+  // });
+  // const unstake_config = await ownerAccount.viewFunction(
+  //   stakingContractName,
+  //   "get_stake_info",
+  //   {
+  //     owner: ownerAccountName,
+  //   }
+  // );
+  // console.log("unstake_info: ", unstake_config);
+
+  // await ownerAccount.functionCall({
+  //   contractId: stakingContractName,
+  //   methodName: "fetch_unstake",
+  //   args: {},
+  //   gas: gas,
+  // });
 };
 
 // getConfig();
+// ft_deposit_in_staking();
 nft_staking();
 
 // stakingInit();
