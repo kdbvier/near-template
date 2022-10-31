@@ -12,7 +12,13 @@ pub trait ExtContract {
         balance: Option<U128>,
         max_len_payout: Option<u32>,
     );
-    fn nft_transfer(&mut self, receiver_id: AccountId, token_id: TokenId, approval_id: Option<u64>);
+    fn nft_transfer(
+        &mut self,
+        receiver_id: AccountId,
+        token_id: TokenId,
+        approval_id: Option<u64>,
+        memo: Option<String>,
+    );
 }
 
 /// TODO: this should be in the near_standard_contracts

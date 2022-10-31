@@ -92,6 +92,7 @@ const bidderAccount = new nearAPI.Account(
   near1.connection,
   "vier1near.testnet"
 );
+const bidderAccountName = "vier1near.testnet";
 const bidderAccount2 = new nearAPI.Account(near3.connection, "oplec.testnet");
 
 const stakingContract = new nearAPI.Contract(
@@ -103,10 +104,10 @@ const stakingContract = new nearAPI.Contract(
       "get_config",
       "get_enable_status",
       "get_total_amount",
-      "get_treasury",
-      "get_supply_by_owner_id",
       "storage_minimum_balance",
       "storage_balance_of",
+      "get_stake_info",
+      "get_all_stake_info",
     ],
     changeMethods: [
       "new",
@@ -115,14 +116,6 @@ const stakingContract = new nearAPI.Contract(
       "update_owner",
       "update_enable",
       "claim_rewards",
-      "remove_approved_nft_contract_ids",
-      "buy",
-      "add_offer",
-      "delete_offer",
-      "add_bid",
-      "accept_bid",
-      "update_market_data",
-      "delete_market_data",
     ],
   }
 );
@@ -156,6 +149,7 @@ module.exports = {
   contractMethods,
   tokenOwnerAccount,
   bidderAccount,
+  bidderAccountName,
   bidderAccount2,
   explorerUrl,
   ftContract,

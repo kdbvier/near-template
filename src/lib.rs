@@ -267,6 +267,7 @@ impl Contract {
                 staking_info.address.clone(),
                 token_id.clone(),
                 None,
+                None,
                 env::current_account_id(),
                 1,
                 GAS_FOR_NFT_TRANSFER,
