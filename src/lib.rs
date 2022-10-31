@@ -309,11 +309,11 @@ impl Contract {
             0,
             Gas(10_000_000_000_000),
         )
-        // .then(ext_self::ft_balance_of_callback(
-        //     env::current_account_id(),
-        //     0,
-        //     Gas(0),
-        // ))
+        .then(ext_self::ft_balance_of_callback(
+            env::current_account_id(),
+            0,
+            Gas(10_000_000_000_000),
+        ))
     }
 
     #[private]

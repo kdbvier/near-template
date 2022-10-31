@@ -128,8 +128,14 @@ const stakingContract = new nearAPI.Contract(
 );
 
 const nftContract = new nearAPI.Contract(ownerAccount, nftContractName, {
-  viewMethods: ["nft_token"],
-  changeMethods: ["nft_transfer", "nft_transfer_call", "new_default_meta"],
+  viewMethods: ["nft_token", "nft_get_series"],
+  changeMethods: [
+    "nft_transfer",
+    "nft_transfer_call",
+    "new_default_meta",
+    "nft_create_series",
+    "nft_mint",
+  ],
 });
 const ftContract = new nearAPI.Contract(ownerAccount, ftContractName, {
   viewMethods: ["ft_balance_of"],
