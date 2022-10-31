@@ -242,23 +242,23 @@ const nft_staking = async () => {
   //   attachedDeposit: "1",
   // });
 
-  // const staked_nft = await ownerAccount.viewFunction(
-  //   nftContractName,
-  //   "nft_token",
-  //   {
-  //     token_id: "1:4",
-  //   }
-  // );
-  // console.log("staked_nft: ", staked_nft);
-
-  const pre_balance = await ownerAccount.viewFunction(
-    ftContractName,
-    "ft_balance_of",
+  const staked_nft = await ownerAccount.viewFunction(
+    nftContractName,
+    "nft_token",
     {
-      account_id: ownerAccountName,
+      token_id: "1:4",
     }
   );
-  console.log("pre_balance: ", pre_balance);
+  console.log("staked_nft: ", staked_nft);
+
+  // const pre_balance = await ownerAccount.viewFunction(
+  //   ftContractName,
+  //   "ft_balance_of",
+  //   {
+  //     account_id: bidderAccountName,
+  //   }
+  // );
+  // console.log("pre_balance: ", pre_balance);
 
   // const config = await ownerAccount.viewFunction(
   //   stakingContractName,
@@ -291,12 +291,12 @@ const nft_staking = async () => {
   //   stakingContractName,
   //   "get_stake_info",
   //   {
-  //     owner: ownerAccountName,
+  //     owner: bidderAccountName,
   //     // owner: bidderAccountName,
   //   }
   // );
   // console.log("claim_config: ", claim_config);
-  // await ownerAccount.functionCall({
+  // await bidderAccount.functionCall({
   //   contractId: stakingContractName,
   //   methodName: "create_unstake",
   //   args: {},
@@ -304,7 +304,7 @@ const nft_staking = async () => {
   //   attachedDeposit: "1",
   // });
 
-  // await ownerAccount.functionCall({
+  // await bidderAccount.functionCall({
   //   contractId: stakingContractName,
   //   methodName: "fetch_unstake",
   //   args: {},
@@ -314,11 +314,19 @@ const nft_staking = async () => {
   //   stakingContractName,
   //   "get_stake_info",
   //   {
-  //     owner: ownerAccountName,
-  //     // owner: bidderAccountName,
+  //     // owner: ownerAccountName,
+  //     owner: bidderAccountName,
   //   }
   // );
   // console.log("after_claim_config: ", after_claim_config);
+  // const after_balance = await ownerAccount.viewFunction(
+  //   ftContractName,
+  //   "ft_balance_of",
+  //   {
+  //     account_id: bidderAccountName,
+  //   }
+  // );
+  // console.log("after_balance: ", after_balance);
 };
 
 // getConfig();

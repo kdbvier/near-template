@@ -268,17 +268,17 @@ impl Contract {
                 token_id.clone(),
                 None,
                 None,
-                env::current_account_id(),
+                self.nft_address.clone(),
                 1,
                 GAS_FOR_NFT_TRANSFER,
-            )
-            .then(ext_self::nft_unstaking_callback(
-                account.clone(),
-                token_id.clone(),
-                env::current_account_id(),
-                1,
-                GAS_FOR_NFT_TRANSFER,
-            ));
+            );
+            // .then(ext_self::nft_unstaking_callback(
+            //     account.clone(),
+            //     token_id.clone(),
+            //     env::current_account_id(),
+            //     1,
+            //     GAS_FOR_NFT_TRANSFER,
+            // ));
             env::log_str(
                 &json!({
                     "type": "unstake_nft",
@@ -383,20 +383,20 @@ impl Contract {
         U128(0)
     }
 
-    #[private]
-    pub fn nft_unstaking_callback(&mut self, owner_id: AccountId, token_id: String) -> U128 {
-        env::log_str(
-            &json!({
-                "type": "unstake_nft",
-                "params": {
-                    "owner_id": owner_id,
-                    "token_id": token_id,
-                }
-            })
-            .to_string(),
-        );
-        U128(0)
-    }
+    // #[private]
+    // pub fn nft_unstaking_callback(&mut self, owner_id: AccountId, token_id: String) -> U128 {
+    //     env::log_str(
+    //         &json!({
+    //             "type": "unstake_nft",
+    //             "params": {
+    //                 "owner_id": owner_id,
+    //                 "token_id": token_id,
+    //             }
+    //         })
+    //         .to_string(),
+    //     );
+    //     U128(0)
+    // }
 
     // pub fn get_supply_by_owner_id(&self, account_id: AccountId) -> U64 {
     //     self.staking_per_owner
