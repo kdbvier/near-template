@@ -316,6 +316,10 @@ impl Contract {
         ))
     }
 
+    pub fn get_stake_info(&self, owner: AccountId) -> StakingInfo {
+        self.staking_per_owner.get(&owner)
+    }
+
     #[private]
     pub fn ft_balance_of_callback(&mut self) -> String {
         assert_eq!(env::promise_results_count(), 1, "This is a callback method");

@@ -160,4 +160,5 @@ module.exports = {
   explorerUrl,
   ftContract,
   ftContractName,
+  stakingContractAccount,
 };

@@ -87,18 +87,18 @@ const getConfig = async () => {
       }
     );
     console.log("ft_amount_in_ft_contract: ", ft_amount_in_ft_contract);
-    // const ft_amount = await ownerAccount.viewFunction(
-    //   stakingContractName,
-    //   "get_total_amount",
-    //   {},
-
-    // );
-    const ft_amount = await ownerAccount.functionCall({
-      contractId: stakingContractName,
-      methodName: "get_total_amount",
-      args: {},
-      gas: gas,
-    });
+    const ft_amount = await ownerAccount.viewFunction(
+      stakingContractName,
+      "get_total_amount",
+      {},
+      gas
+    );
+    // const ft_amount = await ownerAccount.functionCall({
+    //   contractId: stakingContractName,
+    //   methodName: "get_total_amount",
+    //   args: {},
+    //   gas: gas,
+    // });
     console.log("ft_amount: ", ft_amount);
   } catch (err) {
     throw err;
@@ -125,13 +125,75 @@ const nft_staking = async () => {
   //   300000000000000, //	attached GAS
   //   "8540000000000000000000"
   // );
+
+  // const ret = await ownerAccount.functionCall({
+  //   contractId: nftContractName,
+  //   methodName: "nft_create_series",
+  //   args: {
+  //     token_metadata: {
+  //       title: "Dark",
+  //       media: "bafybeifdbvb6yzajogbe4dbn3bgxoli3sp7ol7upfmu2givpvbwufydthu",
+  //       reference:
+  //         "bafybeifvzitvju4ftwnkf7w7yakz7i5colcey223uk2ui4t5z3ss7l2od4",
+  //       copies: 100,
+  //     },
+  //     price: null,
+  //     royalty: {
+  //       "viernear.testnet": 1000,
+  //     },
+  //     creator_id: "viernear.testnet",
+  //   },
+  //   gas: gas,
+  //   attachedDeposit: "8540000000000000000000",
+  // });
+
   // const nft_series = await nftContract.nft_get_series();
-  console.log("nft_series: ", nft_series);
-  const minted_nft = await nftContract.nft_mint;
+  // console.log("nft_series: ", nft_series);
+
+  // const result = await ownerAccount.functionCall({
+  //   contractId: nftContractName,
+  //   methodName: "nft_mint",
+  //   args: {
+  //     token_series_id: "1",
+  //     receiver_id: ownerAccountName,
+  //   },
+  //   gas: gas,
+  //   attachedDeposit: "8540000000000000000000",
+  // });
+
+  // const minted_nft = await ownerAccount.viewFunction(
+  //   nftContractName,
+  //   "nft_token",
+  //   {
+  //     token_id: "1:1",
+  //   }
+  // );
+  // console.log("minted_nft: ", minted_nft);
+
+  // await ownerAccount.functionCall({
+  //   contractId: nftContractName,
+  //   methodName: "nft_transfer_call",
+  //   args: {
+  //     receiver_id: stakingContractName,
+  //     token_id: "1:1",
+  //     msg: JSON.stringify({}),
+  //   },
+  //   gas: gas,
+  //   attachedDeposit: "1",
+  // });
+  // const staked_nft = await ownerAccount.viewFunction(
+  //   nftContractName,
+  //   "nft_token",
+  //   {
+  //     token_id: "1:1",
+  //   }
+  // );
+  // console.log("staked_nft: ", staked_nft);
+  // const config =
 };
 
-getConfig();
-// nft_staking();
+// getConfig();
+nft_staking();
 
 // stakingInit();
 // nftInit();
