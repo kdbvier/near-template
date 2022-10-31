@@ -15,6 +15,7 @@ pub type TokenId = String;
 
 const GAS_FOR_FT_TRANSFER: Gas = Gas(10_000_000_000_000);
 const GAS_FOR_NFT_TRANSFER: Gas = Gas(20_000_000_000_000);
+pub const STORAGE_ADD_STAKING_DATA: u128 = 8590000000000000000000;
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct StakingInfo {
@@ -425,47 +426,44 @@ impl Contract {
     // }
 
     // Storage
-    // #[payable]
-    // pub fn storage_deposit(&mut self, account_id: Option<AccountId>) {
-    //     let storage_account_id = account_id
-    //         .map(|a| a.into())
-    //         .unwrap_or_else(env::predecessor_account_id);
-    //     let deposit = env::attached_deposit();
-    //     assert!(
-    //         deposit >= STORAGE_ADD_STAKING_DATA,
-    //         "Requires minimum deposit of {}",
-    //         STORAGE_ADD_STAKING_DATA
-    //     );
+    #[payable]
+    pub fn storage_deposit(&mut self, account_id: Option<AccountId>) {
+        let storage_account_id = account_id
+            .map(|a| a.into())
+            .unwrap_or_else(env::predecessor_account_id);
+        let deposit = env::attached_deposit();
+        assert!(
+            deposit >= STORAGE_ADD_STAKING_DATA,
+            "Requires minimum deposit of {}",
+            STORAGE_ADD_STAKING_DATA
+        );
 
-    //     let mut balance: u128 = self.storage_deposits.get(&storage_account_id).unwrap_or(0);
-    //     balance += deposit;
-    //     self.storage_deposits.insert(&storage_account_id, &balance);
-    // }
+        let mut balance: u128 = self.storage_deposits.get(&storage_account_id).unwrap_or(0);
+        balance += deposit;
+        self.storage_deposits.insert(&storage_account_id, &balance);
+    }
 
-    // #[payable]
-    // pub fn storage_withdraw(&mut self) {
-    //     assert_one_yocto();
-    //     let owner_id = env::predecessor_account_id();
-    //     let mut amount = self.storage_deposits.remove(&owner_id).unwrap_or(0);
-    //     let market_data_owner = self.staking_per_owner.get(&owner_id);
-    //     let len = market_data_owner.map(|s| s.len()).unwrap_or_default();
-    //     let diff = u128::from(len) * STORAGE_ADD_STAKING_DATA;
-    //     amount -= diff;
-    //     if amount > 0 {
-    //         Promise::new(owner_id.clone()).transfer(amount);
-    //     }
-    //     if diff > 0 {
-    //         self.storage_deposits.insert(&owner_id, &diff);
-    //     }
-    // }
+    #[payable]
+    pub fn storage_withdraw(&mut self) {
+        assert_one_yocto();
+        let owner_id = env::predecessor_account_id();
+        let stake_info = self.staking_per_owner.get(&owner_id);
 
-    // pub fn storage_minimum_balance(&self) -> u128 {
-    //     u128(STORAGE_ADD_STAKING_DATA)
-    // }
+        if stake_info.is_none() {
+            let amount = self.storage_deposits.remove(&owner_id).unwrap_or(0);
+            if amount > 0 {
+                Promise::new(owner_id.clone()).transfer(amount);
+            }
+        }
+    }
 
-    // pub fn storage_balance_of(&self, account_id: AccountId) -> u128 {
-    //     self.storage_deposits.get(&account_id).unwrap_or(0).into()
-    // }
+    pub fn storage_minimum_balance(&self) -> u128 {
+        STORAGE_ADD_STAKING_DATA
+    }
+
+    pub fn storage_balance_of(&self, account_id: AccountId) -> u128 {
+        self.storage_deposits.get(&account_id).unwrap_or(0).into()
+    }
 }
 
 pub fn hash_account_id(account_id: &AccountId) -> CryptoHash {
