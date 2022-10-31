@@ -224,18 +224,18 @@ const nft_staking = async () => {
   //   nftContractName,
   //   "nft_token",
   //   {
-  //     token_id: "1:3",
+  //     token_id: "1:5",
   //   }
   // );
   // console.log("minted_nft: ", minted_nft);
 
-  // // await ownerAccount.functionCall({
+  // await ownerAccount.functionCall({
   // await bidderAccount.functionCall({
   //   contractId: nftContractName,
   //   methodName: "nft_transfer_call",
   //   args: {
   //     receiver_id: stakingContractName,
-  //     token_id: "1:4",
+  //     token_id: "1:5",
   //     msg: JSON.stringify({}),
   //   },
   //   gas: gas,
@@ -246,7 +246,7 @@ const nft_staking = async () => {
     nftContractName,
     "nft_token",
     {
-      token_id: "1:4",
+      token_id: "1:5",
     }
   );
   console.log("staked_nft: ", staked_nft);

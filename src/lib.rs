@@ -120,6 +120,17 @@ impl Contract {
         self.enabled = enabled;
     }
 
+    #[payable]
+    pub fn update_config(&mut self, config: ConfigInfo) {
+        assert_one_yocto();
+        self.interval = config.interval;
+        self.daily_reward = config.daily_reward;
+        self.lock_time = config.lock_time;
+        self.ft_address = config.ft_address;
+        self.nft_address = config.nft_address;
+        self.enabled = config.enabled;
+    }
+
     fn update_unclaimed_amount(&mut self, owner_id: AccountId) {
         let mut user_stake_info = self
             .staking_per_owner
@@ -244,6 +255,14 @@ impl Contract {
             .staking_per_owner
             .get(&account)
             .expect("Marble: no nft");
+        assert_ne!(
+            staking_info.create_unstake_timestamp, 0u64,
+            "Marble: Create unstake first"
+        );
+        assert!(
+            to_sec(env::block_timestamp()) > self.lock_time + staking_info.create_unstake_timestamp,
+            "Marble: Still in lock"
+        );
         if staking_info.unclaimed_amount > 0u128 {
             ext_fungible_token::ft_transfer(
                 account.clone(),
