@@ -28,7 +28,7 @@ impl NonFungibleTokenReceiver for Contract {
         let owner_paid_storage = self.storage_deposits.get(&signer_id).unwrap_or(0);
         // let signer_storage_required =
         //     (self.get_supply_by_owner_id(signer_id).0 + 1) as u128 * storage_amount;
-
+        assert!(self.enabled, "Staking is not enabled");
         assert!(
             owner_paid_storage >= storage_amount,
             "Insufficient storage paid"
