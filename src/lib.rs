@@ -38,6 +38,7 @@ pub struct ConfigInfo {
     pub lock_time: u64,
     pub enabled: bool,
     pub collection_number: String,
+    pub total_supply: u64,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -339,6 +340,7 @@ impl Contract {
             lock_time: self.lock_time,
             enabled: self.enabled,
             collection_number: self.collection_number.clone(),
+            total_supply: self.total_supply,
         }
     }
 

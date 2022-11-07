@@ -29,6 +29,7 @@ const stakingInit = async () => {
         daily_reward: 1000,
         interval: 3600,
         lock_time: 3600,
+        collection_number: "7",
       },
     });
   } catch (error) {
@@ -348,8 +349,8 @@ const nft_staking = async () => {
 
 // getConfig();
 // ft_deposit_in_staking();
-nft_staking();
+// nft_staking();
 
-// stakingInit();
+stakingInit();
 // nftInit();
 // ftInit();
