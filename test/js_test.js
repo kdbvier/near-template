@@ -81,14 +81,14 @@ const getConfig = async () => {
     //   {}
     // );
     // console.log("staking-config: ", upadated_config);
-    const ft_amount_in_ft_contract = await ownerAccount.viewFunction(
-      ftContractName,
-      "ft_balance_of",
-      {
-        account_id: stakingContractName,
-      }
-    );
-    console.log("ft_amount_in_ft_contract: ", ft_amount_in_ft_contract);
+    // const ft_amount_in_ft_contract = await ownerAccount.viewFunction(
+    //   ftContractName,
+    //   "ft_balance_of",
+    //   {
+    //     account_id: stakingContractName,
+    //   }
+    // );
+    // console.log("ft_amount_in_ft_contract: ", ft_amount_in_ft_contract);
     // const ft_amount = await ownerAccount.viewFunction(
     //   stakingContractName,
     //   "get_total_amount",
@@ -102,6 +102,28 @@ const getConfig = async () => {
     //   gas: gas,
     // });
     // console.log("ft_amount: ", ft_amount);
+
+    const enabled = await ownerAccount.viewFunction(
+      stakingContractName,
+      "get_enable_status",
+      {}
+    );
+    console.log("pre_enabled: ", enabled);
+    await ownerAccount.functionCall({
+      contractId: stakingContractName,
+      methodName: "update_enable",
+      args: {
+        enabled: true,
+      },
+      gas: gas,
+      attachedDeposit: "1",
+    });
+    const after_enabled = await ownerAccount.viewFunction(
+      stakingContractName,
+      "get_enable_status",
+      {}
+    );
+    console.log("after_enabled: ", after_enabled);
   } catch (err) {
     console.log("errrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr: ", err);
     throw err;
@@ -204,17 +226,17 @@ const nft_staking = async () => {
   // });
   // const nft_series = await nftContract.nft_get_series();
   // console.log("nft_series: ", nft_series);
-  // const result = await ownerAccount.functionCall({
-  //   contractId: nftContractName,
-  //   methodName: "nft_mint",
-  //   args: {
-  //     token_series_id: "1",
-  //     // receiver_id: ownerAccountName,
-  //     receiver_id: "viernear.testnet",
-  //   },
-  //   gas: gas,
-  //   attachedDeposit: "8540000000000000000000",
-  // });
+  const result = await ownerAccount.functionCall({
+    contractId: nftContractName,
+    methodName: "nft_mint",
+    args: {
+      token_series_id: "1",
+      // receiver_id: ownerAccountName,
+      receiver_id: "marbletestnet.testnet",
+    },
+    gas: gas,
+    attachedDeposit: "8540000000000000000000",
+  });
   // const minted_nft = await ownerAccount.viewFunction(
   //   nftContractName,
   //   "nft_token",

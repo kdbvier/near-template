@@ -1,7 +1,7 @@
 use external::{ext_fungible_token, ext_non_fungible_token};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::collections::{LazyOption, LookupMap, LookupSet, UnorderedMap, UnorderedSet};
-use near_sdk::json_types::{U128, U64};
+use near_sdk::collections::{LookupMap, UnorderedMap};
+use near_sdk::json_types::U128;
 use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::{
     assert_one_yocto, env, ext_contract, near_bindgen, serde_json::json, AccountId, Balance,
@@ -37,6 +37,7 @@ pub struct ConfigInfo {
     pub interval: u64,
     pub lock_time: u64,
     pub enabled: bool,
+    pub collection_number: String,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -54,7 +55,7 @@ pub struct Contract {
 
     //keeps track of all the token IDs for a given account
     pub staking_per_owner: UnorderedMap<AccountId, StakingInfo>,
-
+    pub collection_number: String,
     pub storage_deposits: LookupMap<AccountId, Balance>,
     pub nft_address: AccountId,
     pub ft_address: AccountId,
@@ -62,6 +63,7 @@ pub struct Contract {
     pub interval: u64,
     pub lock_time: u64,
     pub enabled: bool,
+    pub total_supply: u64,
 }
 
 #[derive(BorshSerialize, BorshStorageKey)]
@@ -83,6 +85,7 @@ impl Contract {
         daily_reward: u128,
         interval: u64,
         lock_time: u64,
+        collection_number: String,
     ) -> Self {
         let this = Self {
             staking_per_owner: UnorderedMap::new(StorageKey::TokensPerOwner),
@@ -94,6 +97,8 @@ impl Contract {
             interval,
             lock_time,
             enabled: false,
+            collection_number,
+            total_supply: 0,
         };
 
         this
@@ -130,6 +135,7 @@ impl Contract {
         self.ft_address = config.ft_address;
         self.nft_address = config.nft_address;
         self.enabled = config.enabled;
+        self.collection_number = config.collection_number;
     }
 
     fn update_unclaimed_amount(&mut self, owner_id: AccountId) {
@@ -142,7 +148,8 @@ impl Contract {
                 / self.interval as u128
                 - user_stake_info.last_timestamp as u128 / self.interval as u128)
                 * (user_stake_info.token_ids.len() as u128))
-                * self.daily_reward;
+                * self.daily_reward
+                / self.total_supply as u128;
             user_stake_info.last_timestamp = to_sec(env::block_timestamp());
             self.staking_per_owner.insert(&owner_id, &user_stake_info);
         }
@@ -156,6 +163,11 @@ impl Contract {
         _token_id: String,
     ) {
         assert_eq!(_nft_contract_id, self.nft_address, "Not Allowed NFT");
+        let collection_number: String = _token_id.split(":").next().unwrap().parse().unwrap();
+        assert_eq!(
+            collection_number, self.collection_number,
+            "Not Allowed Collection"
+        );
         let mut record = StakingInfo {
             address: _previous_owner_id.clone(),
             token_ids: vec![_token_id.clone()],
@@ -176,6 +188,7 @@ impl Contract {
             record.token_ids = list;
         }
         self.staking_per_owner.insert(&_previous_owner_id, &record);
+        self.total_supply += 1;
 
         env::log_str(
             &json!({
@@ -235,7 +248,7 @@ impl Contract {
             .get(&account)
             .expect("Marble: No nfts");
         staking_info.create_unstake_timestamp = to_sec(env::block_timestamp());
-
+        self.total_supply -= staking_info.token_ids.len() as u64;
         self.staking_per_owner.insert(&account, &staking_info);
         env::log_str(
             &json!({
@@ -325,6 +338,7 @@ impl Contract {
             interval: self.interval,
             lock_time: self.lock_time,
             enabled: self.enabled,
+            collection_number: self.collection_number.clone(),
         }
     }
 
@@ -506,6 +520,7 @@ mod tests {
             100,
             1000000,
             1000000000,
+            "1".to_string(),
         );
         (context, contract)
     }
