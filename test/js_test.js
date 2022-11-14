@@ -81,6 +81,25 @@ const getConfig = async () => {
     //   "get_owner",
     //   {}
     // );
+
+    await ownerAccount.functionCall({
+      contractId: stakingContractName,
+      methodName: "update_config",
+      args: {
+        config: {
+          nft_address: "marblenft.marbledao.testnet",
+          ft_address: ftContractName,
+          daily_reward: 1000,
+          interval: 300,
+          lock_time: 300,
+          collection_number: "7",
+          enabled: true,
+          total_supply: 0,
+        },
+      },
+      gas: gas,
+      attachedDeposit: "1",
+    });
     // console.log("staking-config: ", upadated_config);
     // const ft_amount_in_ft_contract = await ownerAccount.viewFunction(
     //   ftContractName,
@@ -104,27 +123,27 @@ const getConfig = async () => {
     // });
     // console.log("ft_amount: ", ft_amount);
 
-    const enabled = await ownerAccount.viewFunction(
-      stakingContractName,
-      "get_enable_status",
-      {}
-    );
-    console.log("pre_enabled: ", enabled);
-    await ownerAccount.functionCall({
-      contractId: stakingContractName,
-      methodName: "update_enable",
-      args: {
-        enabled: true,
-      },
-      gas: gas,
-      attachedDeposit: "1",
-    });
-    const after_enabled = await ownerAccount.viewFunction(
-      stakingContractName,
-      "get_enable_status",
-      {}
-    );
-    console.log("after_enabled: ", after_enabled);
+    // const enabled = await ownerAccount.viewFunction(
+    //   stakingContractName,
+    //   "get_enable_status",
+    //   {}
+    // );
+    // console.log("pre_enabled: ", enabled);
+    // await ownerAccount.functionCall({
+    //   contractId: stakingContractName,
+    //   methodName: "update_enable",
+    //   args: {
+    //     enabled: true,
+    //   },
+    //   gas: gas,
+    //   attachedDeposit: "1",
+    // });
+    // const after_enabled = await ownerAccount.viewFunction(
+    //   stakingContractName,
+    //   "get_enable_status",
+    //   {}
+    // );
+    // console.log("after_enabled: ", after_enabled);
   } catch (err) {
     console.log("errrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr: ", err);
     throw err;
@@ -347,10 +366,10 @@ const nft_staking = async () => {
   // console.log("after_balance: ", after_balance);
 };
 
-// getConfig();
+getConfig();
 // ft_deposit_in_staking();
 // nft_staking();
 
-stakingInit();
+// stakingInit();
 // nftInit();
 // ftInit();

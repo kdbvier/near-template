@@ -39,6 +39,7 @@ pub struct ConfigInfo {
     pub enabled: bool,
     pub collection_number: String,
     pub total_supply: u64,
+    pub end_date: u64,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -65,6 +66,7 @@ pub struct Contract {
     pub lock_time: u64,
     pub enabled: bool,
     pub total_supply: u64,
+    pub end_date: u64,
 }
 
 #[derive(BorshSerialize, BorshStorageKey)]
@@ -87,6 +89,7 @@ impl Contract {
         interval: u64,
         lock_time: u64,
         collection_number: String,
+        end_date: u64,
     ) -> Self {
         let this = Self {
             staking_per_owner: UnorderedMap::new(StorageKey::TokensPerOwner),
@@ -100,6 +103,7 @@ impl Contract {
             enabled: false,
             collection_number,
             total_supply: 0,
+            end_date,
         };
 
         this
@@ -128,6 +132,16 @@ impl Contract {
     }
 
     #[payable]
+    pub fn update_end_date(&mut self, end_date: u64) {
+        assert_one_yocto();
+        assert_eq!(
+            env::predecessor_account_id(),
+            self.owner_id,
+            "Marble: Owner only"
+        );
+        self.end_date = end_date;
+    }
+    #[payable]
     pub fn update_config(&mut self, config: ConfigInfo) {
         assert_one_yocto();
         self.interval = config.interval;
@@ -144,9 +158,14 @@ impl Contract {
             .staking_per_owner
             .get(&owner_id)
             .expect("Marble: You don't have any staking nft");
+        let last_timestamp: u64;
+        if to_sec(env::block_timestamp()) > self.end_date {
+            last_timestamp = self.end_date;
+        } else {
+            last_timestamp = to_sec(env::block_timestamp());
+        }
         if user_stake_info.create_unstake_timestamp == 0u64 {
-            user_stake_info.unclaimed_amount += ((to_sec(env::block_timestamp()) as u128
-                / self.interval as u128
+            user_stake_info.unclaimed_amount += ((last_timestamp as u128 / self.interval as u128
                 - user_stake_info.last_timestamp as u128 / self.interval as u128)
                 * (user_stake_info.token_ids.len() as u128))
                 * self.daily_reward
@@ -168,6 +187,11 @@ impl Contract {
         assert_eq!(
             collection_number, self.collection_number,
             "Not Allowed Collection"
+        );
+        assert!(self.enabled, "Marble: Staking disabled");
+        assert!(
+            self.end_date > to_sec(env::block_timestamp()),
+            "Marble: Staking ended"
         );
         let mut record = StakingInfo {
             address: _previous_owner_id.clone(),
@@ -341,6 +365,7 @@ impl Contract {
             enabled: self.enabled,
             collection_number: self.collection_number.clone(),
             total_supply: self.total_supply,
+            end_date: self.end_date,
         }
     }
 
@@ -523,6 +548,7 @@ mod tests {
             1000000,
             1000000000,
             "1".to_string(),
+            100000000,
         );
         (context, contract)
     }
