@@ -1,4 +1,4 @@
-const stakingContractName = "staking.marblestaking.testnet";
+const stakingContractName = "staking2.marblestaking.testnet";
 const nftContractName = "nft.marblestaking.testnet";
 const ownerAccountName = "marblestaking.testnet";
 const ftContractName = "ft.marblestaking.testnet";

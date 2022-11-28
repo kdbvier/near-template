@@ -170,7 +170,7 @@ impl Contract {
                 * (user_stake_info.token_ids.len() as u128))
                 * self.daily_reward
                 / self.total_supply as u128;
-            user_stake_info.last_timestamp = to_sec(env::block_timestamp());
+            user_stake_info.last_timestamp = last_timestamp;
             self.staking_per_owner.insert(&owner_id, &user_stake_info);
         }
     }
@@ -337,6 +337,44 @@ impl Contract {
             //     1,
             //     GAS_FOR_NFT_TRANSFER,
             // ));
+            env::log_str(
+                &json!({
+                    "type": "unstake_nft",
+                    "params": {
+                        "owner_id": staking_info.address,
+                        "token_id": token_id,
+                    }
+                })
+                .to_string(),
+            );
+        }
+        self.staking_per_owner.remove(&account);
+    }
+
+    #[payable]
+    pub fn withdraw_nfts(&mut self, account: AccountId) {
+        assert_one_yocto();
+        assert_eq!(
+            env::predecessor_account_id(),
+            self.owner_id,
+            "Marble: Owner only"
+        );
+        self.update_unclaimed_amount(account.clone());
+        let staking_info = self
+            .staking_per_owner
+            .get(&account)
+            .expect("Marble: no nft");
+
+        for token_id in staking_info.token_ids.clone() {
+            ext_non_fungible_token::nft_transfer(
+                staking_info.address.clone(),
+                token_id.clone(),
+                None,
+                None,
+                self.nft_address.clone(),
+                1,
+                GAS_FOR_NFT_TRANSFER,
+            );
             env::log_str(
                 &json!({
                     "type": "unstake_nft",

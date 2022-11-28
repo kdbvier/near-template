@@ -18,18 +18,19 @@ const {
 } = testUtils;
 
 const ftTokenAccount = "hera.cmdev0.testnet";
-
+const nftAccount = "marblenft.marbledao.testnet";
 const stakingInit = async () => {
   try {
     await stakingContract.new({
       args: {
         owner_id: ownerAccountName,
-        nft_address: nftContractName,
-        ft_address: ftContractName,
+        nft_address: nftAccount,
+        ft_address: ftTokenAccount,
         daily_reward: 1000,
-        interval: 3600,
-        lock_time: 3600,
-        collection_number: "7",
+        interval: 86400,
+        lock_time: 1814400,
+        collection_number: "140",
+        end_date: 1670414400,
       },
     });
   } catch (error) {
@@ -60,13 +61,20 @@ const ftInit = async () => {
 
 const getConfig = async () => {
   try {
-    // const config = await ownerAccount.viewFunction(
-    //   stakingContractName,
-    //   "get_config",
-    //   {}
+    const config = await ownerAccount.viewFunction(
+      stakingContractName,
+      "get_config",
+      {}
+    );
+    console.log("staking-config: ", config);
+    // const after_ft_balance = await ownerAccount.viewFunction(
+    //   ftTokenAccount,
+    //   "ft_balance_of",
+    //   {
+    //     account_id: stakingContractName,
+    //   }
     // );
-    // console.log("staking-config: ", config);
-
+    // console.log("ft balance before staking: ", after_ft_balance);
     // await ownerAccount.functionCall({
     //   contractId: stakingContractName,
     //   methodName: "update_enable",
@@ -82,24 +90,26 @@ const getConfig = async () => {
     //   {}
     // );
 
-    await ownerAccount.functionCall({
-      contractId: stakingContractName,
-      methodName: "update_config",
-      args: {
-        config: {
-          nft_address: "marblenft.marbledao.testnet",
-          ft_address: ftContractName,
-          daily_reward: 1000,
-          interval: 300,
-          lock_time: 300,
-          collection_number: "7",
-          enabled: true,
-          total_supply: 0,
-        },
-      },
-      gas: gas,
-      attachedDeposit: "1",
-    });
+    // await ownerAccount.functionCall({
+    //   contractId: stakingContractName,
+    //   methodName: "update_config",
+    //   args: {
+    //     config: {
+    //       owner_id: ownerAccountName,
+    //       nft_address: nftAccount,
+    //       ft_address: ftTokenAccount,
+    //       daily_reward: 1000000000000,
+    //       interval: 86400,
+    //       lock_time: 1814400,
+    //       collection_number: "140",
+    //       end_date: 1670414400,
+    //       total_supply: 0,
+    //       enabled: true,
+    //     },
+    //   },
+    //   gas: gas,
+    //   attachedDeposit: "1",
+    // });
     // console.log("staking-config: ", upadated_config);
     // const ft_amount_in_ft_contract = await ownerAccount.viewFunction(
     //   ftContractName,
@@ -177,15 +187,15 @@ const ft_deposit_in_staking = async () => {
     }
   );
   console.log("ft balance before staking: ", after_ft_balance);
-  const storage_deposit = await ownerAccount.functionCall({
-    contractId: ftContractName,
-    methodName: "storage_deposit",
-    args: {
-      account_id: ownerAccountName,
-    },
-    gas: gas,
-    attachedDeposit: "10000000000000000000000",
-  });
+  // const storage_deposit = await ownerAccount.functionCall({
+  //   contractId: ftContractName,
+  //   methodName: "storage_deposit",
+  //   args: {
+  //     account_id: ownerAccountName,
+  //   },
+  //   gas: gas,
+  //   attachedDeposit: "10000000000000000000000",
+  // });
   // await ownerAccount.functionCall({
   //   contractId: ftContractName,
   //   methodName: "mint",
